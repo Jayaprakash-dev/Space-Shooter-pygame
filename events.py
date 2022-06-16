@@ -66,9 +66,6 @@ class Events:
 
                 self.playerUI.update_player_health(50)
 
-                if self.playerUI.player_health <= 0:
-                    self.game.game_status = False
-
     def check_missile_collision(self, bullet, ship_sprites_grp, bullet_sprites_grp):
 
         for sprite in ship_sprites_grp:
@@ -86,7 +83,7 @@ class Events:
 
                         if self.playerUI.player_health <= 0:
                             ship_sprites_grp.remove(sprite)
-                            self.game.game_status = False
+                            # self.game.game_status = False
 
                     elif str(sprite) == "enemy_ship":
                         sprite.update_health(25)

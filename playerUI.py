@@ -26,6 +26,9 @@ class PlayerUI:
 
         self.player_health -= val
 
+        if self.player_health > 40:
+            self.health_bar_color = (0, 255, 0)
+
         if self.player_health <= 40:
             self.health_bar_color = (255, 153, 51)
 

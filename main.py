@@ -10,6 +10,7 @@ from playership import PlayerShip
 from settings import Settings
 from playerUI import PlayerUI
 from mainUI import MainUI
+from playerlife import PlayerLife
 
 clock = pygame.time.Clock()
 
@@ -18,7 +19,9 @@ class Game:
 
     def __init__(self) -> None:
 
-        self.game_status = True
+        self.main_screen = True
+        self.game_status = False
+        self.quit = False
 
         self.settings = Settings()
 
@@ -47,18 +50,19 @@ class Game:
 
         self.mainUI = MainUI()
 
+        # self.life_list = [PlayerLife(self, (20, 17)), PlayerLife(self, (70, 17)), PlayerLife(self, (120, 17))]
+        self.life_list = [PlayerLife(self, (20, 17))]
     def run(self):
 
-        while self.game_status:
+        while self.quit is not True:
+            if self.game_status == True:
+                self.events.check_events()
+                self._update_display()
 
-            self.events.check_events()
-            self._update_display()
+                clock.tick(self.settings.fps)
 
-            clock.tick(self.settings.fps)
-
-        self._restart_or_quit()
-        pygame.quit()
-        sys.exit()
+            else:
+                self._restart_or_quit()
 
     def _update_display(self):
         self.main_surface.fill((0, 0, 0))
@@ -101,6 +105,11 @@ class Game:
 
         self.playerUI.update_player_health()
 
+        for life in self.life_list:
+            life.draw()
+
+        self._check_life_of_player()
+
         pygame.display.update()
 
     def load_shooter_of_player_ship(self):
@@ -115,14 +124,50 @@ class Game:
             self.enemy_ship_missiles.add(ship.shoot())
 
     def _restart_or_quit(self):
-        pass
+
+        color = (255, 255, 255)
+
+        font_file = "./assets/fonts/SpaceMission.otf"
+        font_color = (255, 255, 255)
+
+        s_font = pygame.font.Font(font_file, 35)
+        score_font = s_font.render("Game Score: " + str(self.playerUI.score), True, (0, 0, 0))
+
+        menu_font = pygame.font.Font(font_file, 35)
+        pa_font = menu_font.render("Play Again", True, font_color)
+        q_font = menu_font.render("Quit", True, font_color)
+
+        width, height = 500, 300
+        pos = (((self.main_surface.get_width() / 2) / 2) + 15, 320)
+        main_rect = pygame.Rect(pos, (width, height))
+        pa_rect = pygame.Rect((main_rect.left + 150, main_rect.top + 100), (215, 48))
+        q_rect = pygame.Rect((main_rect.left + 150, pa_rect.bottom + 50), (215, 48))
+
+        pygame.draw.rect(self.main_surface, color, main_rect, border_radius=10)
+        pygame.draw.rect(self.main_surface, (0, 0, 0), pa_rect, border_top_left_radius=12, border_bottom_right_radius=12)
+        pygame.draw.rect(self.main_surface, (0, 0, 0), q_rect, border_top_left_radius=12, border_bottom_right_radius=12)
+
+        self.main_surface.blit(score_font, (main_rect.x + 130, main_rect.y + 30))
+        self.main_surface.blit(pa_font, (pa_rect.x + 10, pa_rect.y + 8))
+        self.main_surface.blit(q_font, ((q_rect.x + ((q_rect.width // 2) // 2)) + 16, q_rect.y + 8))
+
+        pygame.display.update()
+
+    def _check_life_of_player(self):
+
+        if self.playerUI.player_health <= 0:
+            self.life_list.pop()
+            self.playerUI.player_health = 100
+
+        if len(self.life_list) <= 0:
+            self.game_status = False
 
 
 if __name__ == "__main__":
 
     game = Game()
 
-    while game.game_status:
+    while game.main_screen:
         MainUI.show_main_board(game.main_surface)
 
         for event in pygame.event.get():

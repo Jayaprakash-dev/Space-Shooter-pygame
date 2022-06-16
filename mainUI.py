@@ -9,6 +9,7 @@ class MainUI:
 
     @staticmethod
     def show_main_board(surface):
+
         color = (255, 255, 255)
 
         font_file = "./assets/fonts/SpaceMission.otf"
@@ -25,11 +26,11 @@ class MainUI:
         exit_font = menu_font.render("EXIT", True, font_color)
 
         width, height = 500, 300
-        pos = (150, 310)
+        pos = (((surface.get_width()/2)/2) + 15, 320)
 
         main_rect = pygame.Rect(pos, (width, height))
-        MainUI.start = start_rect = pygame.Rect((300, main_rect.top + 60), (200, 45))
-        MainUI.exit = exit_rect = pygame.Rect((300, start_rect.bottom + 77), (200, 45))
+        MainUI.start = start_rect = pygame.Rect((main_rect.left + 150, main_rect.top + 60), (200, 45))
+        MainUI.exit = exit_rect = pygame.Rect((main_rect.left + 150, start_rect.bottom + 77), (200, 45))
 
         bg_img = pygame.image.load("./assets/images/PNG/main_screen_bg.jpg")
         bg_img = pygame.transform.scale(bg_img, (surface.get_width(), surface.get_height()))
@@ -66,3 +67,4 @@ class MainUI:
         if event.type == MOUSEBUTTONDOWN:
             if MainUI.exit.collidepoint(MainUI.mouse):
                 return True
+
