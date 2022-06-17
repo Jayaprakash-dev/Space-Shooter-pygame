@@ -12,8 +12,6 @@ class PlayerShip(SpaceShip):
 
         self.rect.x, self.rect.y = 550, 680
 
-        # self.space_ship = pygame.transform.scale(self.space_ship, (120, 130))
-
         if PlayerShip.__instance is None:
             PlayerShip.__instance = self
 
@@ -44,6 +42,14 @@ class PlayerShip(SpaceShip):
         self.shooter.create_missile(self.rect)
 
         return self.shooter
+
+    def set_spaceship(self):
+        self.rect.x, self.rect.y = 550, 680
+        self._moving_up = False
+        self._moving_down = False
+        self._moving_right = False
+        self._moving_left = False
+
 
     def __str__(self):
         return "player_ship"

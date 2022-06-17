@@ -2,6 +2,7 @@ import random
 import sys
 
 import pygame
+from pygame.locals import *
 
 from events import Events
 from explosion import ExplosionGroup
@@ -11,21 +12,25 @@ from settings import Settings
 from playerUI import PlayerUI
 from mainUI import MainUI
 from playerlife import PlayerLife
+from gamehits_animation import GameHitsAnimation as ga
 
 clock = pygame.time.Clock()
+
+main_screen = True
 
 
 class Game:
 
     def __init__(self) -> None:
 
-        self.main_screen = True
-        self.game_status = False
+        self.game_status = True
         self.quit = False
 
-        self.settings = Settings()
+        # It stores how many enemy ships passed over the player ship
+        self.e_ship_passed_count = 0
 
-        pygame.init()
+        self.settings = Settings(difficulty)
+
         self.main_surface = pygame.display.set_mode(self.settings.display_size)
         pygame.display.set_caption("SpaceShooter")
 
@@ -50,12 +55,17 @@ class Game:
 
         self.mainUI = MainUI()
 
-        # self.life_list = [PlayerLife(self, (20, 17)), PlayerLife(self, (70, 17)), PlayerLife(self, (120, 17))]
-        self.life_list = [PlayerLife(self, (20, 17))]
+        self.life_list = []
+
+        self._load_player_life(self.settings.player_lives)
+
+        self.ga_anim = ga(self.main_surface)
+
     def run(self):
 
         while self.quit is not True:
-            if self.game_status == True:
+
+            if self.game_status:
                 self.events.check_events()
                 self._update_display()
 
@@ -64,10 +74,15 @@ class Game:
             else:
                 self._restart_or_quit()
 
+            pygame.display.update()
+
+        pygame.quit()
+        sys.exit()
+
     def _update_display(self):
         self.main_surface.fill((0, 0, 0))
 
-        self.game_layout.set_level('m')
+        self.game_layout.set_level(difficulty)
 
         self.player_ship_missiles.update()
         self.enemy_ship_missiles.update()
@@ -80,7 +95,7 @@ class Game:
             if missile.rect.midbottom[1] < 0:
                 self.player_ship_missiles.remove(missile)
 
-        for missile in self.enemy_ship_missiles: 
+        for missile in self.enemy_ship_missiles:
             missile.span()
 
             self.events.check_missile_collision(missile, self.player_ship_grp, self.enemy_ship_missiles)
@@ -97,6 +112,7 @@ class Game:
 
             if ship.rect.midtop[1] > (self.main_surface.get_height() + 2):
                 self.enemy_ships.remove(ship)
+                self.e_ship_passed_count += 1
 
         self.player_ship.span_ship()
         self.player_ship.move()
@@ -108,9 +124,9 @@ class Game:
         for life in self.life_list:
             life.draw()
 
-        self._check_life_of_player()
+        self._check_player_life()
 
-        pygame.display.update()
+        self.ga_anim.animate()
 
     def load_shooter_of_player_ship(self):
         if len(self.player_ship_missiles) < self.settings.player_missile_count:
@@ -123,67 +139,123 @@ class Game:
         if interval == 1:
             self.enemy_ship_missiles.add(ship.shoot())
 
+    def _load_player_life(self, num):
+        x = 20
+        for i in range(num):
+            x += 50
+            self.life_list.append(PlayerLife(self, (x, 17)))
+
+    def _check_player_life(self):
+
+        if self.playerUI.player_health <= 0:
+            self.life_list.pop()
+            self.playerUI.player_health = 100
+
+        if len(self.life_list) == 0:
+            self.game_status = False
+
+    # asking player to quit or play again, after losing all lives
     def _restart_or_quit(self):
+
+        bg_img = pygame.image.load("./assets/images/PNG/main_screen_bg.jpg")
+        bg_img = pygame.transform.scale(bg_img, (self.main_surface.get_width(), self.main_surface.get_height()))
+        self.main_surface.blit(bg_img, (0, 0))
 
         color = (255, 255, 255)
 
         font_file = "./assets/fonts/SpaceMission.otf"
         font_color = (255, 255, 255)
 
-        s_font = pygame.font.Font(font_file, 35)
+        s_font = pygame.font.Font(font_file, 40)
         score_font = s_font.render("Game Score: " + str(self.playerUI.score), True, (0, 0, 0))
 
         menu_font = pygame.font.Font(font_file, 35)
-        pa_font = menu_font.render("Play Again", True, font_color)
         q_font = menu_font.render("Quit", True, font_color)
 
         width, height = 500, 300
-        pos = (((self.main_surface.get_width() / 2) / 2) + 15, 320)
-        main_rect = pygame.Rect(pos, (width, height))
-        pa_rect = pygame.Rect((main_rect.left + 150, main_rect.top + 100), (215, 48))
-        q_rect = pygame.Rect((main_rect.left + 150, pa_rect.bottom + 50), (215, 48))
+        pos = (((self.main_surface.get_width() / 2) / 2) + 15, 250)
 
+        main_rect = pygame.Rect(pos, (width, height))
         pygame.draw.rect(self.main_surface, color, main_rect, border_radius=10)
-        pygame.draw.rect(self.main_surface, (0, 0, 0), pa_rect, border_top_left_radius=12, border_bottom_right_radius=12)
+        p_rect = pygame.Rect((main_rect.left + 150, main_rect.top + 100), (215, 48))
+        q_rect = pygame.Rect((main_rect.left + 150, p_rect.bottom + 50), (215, 48))
+
+        pygame.draw.rect(self.main_surface, (0, 0, 0), p_rect, border_top_left_radius=12,
+                         border_bottom_right_radius=12)
         pygame.draw.rect(self.main_surface, (0, 0, 0), q_rect, border_top_left_radius=12, border_bottom_right_radius=12)
 
-        self.main_surface.blit(score_font, (main_rect.x + 130, main_rect.y + 30))
-        self.main_surface.blit(pa_font, (pa_rect.x + 10, pa_rect.y + 8))
+        self.main_surface.blit(score_font, (main_rect.x + 85, main_rect.y + 30))
+
+        if len(self.life_list) != 0:
+            p_font = menu_font.render("Resume", True, font_color)
+            self.main_surface.blit(p_font, (p_rect.x + 45, p_rect.y + 8))
+        else:
+            p_font = menu_font.render("Play Again", True, font_color)
+            self.main_surface.blit(p_font, (p_rect.x + 10, p_rect.y + 8))
+
         self.main_surface.blit(q_font, ((q_rect.x + ((q_rect.width // 2) // 2)) + 16, q_rect.y + 8))
 
-        pygame.display.update()
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-    def _check_life_of_player(self):
+            if e.type == MOUSEBUTTONDOWN:
 
-        if self.playerUI.player_health <= 0:
-            self.life_list.pop()
-            self.playerUI.player_health = 100
+                if p_rect.collidepoint(pygame.mouse.get_pos()) and len(self.life_list) != 0:
+                    self.game_status = True
 
-        if len(self.life_list) <= 0:
-            self.game_status = False
+                elif p_rect.collidepoint(pygame.mouse.get_pos()):
+                    self.player_ship.set_spaceship()
+                    self.player_ship_missiles.empty()
+                    self.expl.animation = False
+                    self.enemy_ships.empty()
+                    self.enemy_ship_missiles.empty()
+                    self.playerUI.player_health = 100
+                    self.playerUI.score = 0
+                    self.player_ship_grp.add(self.player_ship)
+                    self._load_player_life(self.settings.player_lives)
+
+                    self.game_status = True
+
+                elif q_rect.collidepoint(pygame.mouse.get_pos()):
+                    self.quit = True
 
 
 if __name__ == "__main__":
 
-    game = Game()
+    pygame.init()
 
-    while game.main_screen:
-        MainUI.show_main_board(game.main_surface)
+    surface = pygame.display.set_mode((1100, 800))
+    pygame.display.set_caption("space  shooter")
+
+    difficulty = 'e'
+
+    while main_screen:
+        MainUI.show_main_board(surface, difficulty)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game.game_status = False
+                pygame.quit()
+                sys.exit()
 
             if MainUI.start_event(event):
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-                game.run()
+                main_screen = False
+                Game().run()
 
             if MainUI.exit_event(event):
                 pygame.quit()
                 sys.exit()
 
-        pygame.display.update()
+            if event.type == KEYDOWN:
+                if event.key == K_e:
+                    difficulty = 'e'
 
-    # game = Game()
-    # game.run()
- 
+                elif event.key == K_m:
+                    difficulty = 'm'
+
+                elif event.key == K_h:
+                    difficulty = 'h'
+
+        pygame.display.update()

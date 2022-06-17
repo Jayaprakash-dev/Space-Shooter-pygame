@@ -49,3 +49,5 @@ class SpaceShip(pygame.sprite.Sprite):
         if self._moving_down:
             self.rect.y += int(speed)
 
+
+

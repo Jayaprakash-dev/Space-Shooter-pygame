@@ -48,4 +48,3 @@ class ExplosionGroup(pygame.sprite.Sprite):
 
     def _draw(self, surface):
         surface.blit(self.image, self.rect.center)
-

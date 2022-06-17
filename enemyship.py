@@ -42,7 +42,7 @@ class EnemyShip(SpaceShip):
     def move(self):
 
         if self.ship_level == 4:
-            self.speed = 1
+            self.speed = 2
 
         return super().move_down(self.speed)
 

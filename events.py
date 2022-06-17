@@ -1,5 +1,3 @@
-import sys
-
 import pygame
 
 from playership import PlayerShip
@@ -81,17 +79,14 @@ class Events:
                     if str(sprite) == "player_ship":
                         self.playerUI.update_player_health(15)
 
-                        if self.playerUI.player_health <= 0:
-                            ship_sprites_grp.remove(sprite)
-                            # self.game.game_status = False
-
                     elif str(sprite) == "enemy_ship":
                         sprite.update_health(25)
 
                         if sprite.health <= 0:
                             ship_sprites_grp.remove(sprite)
 
-                        self.playerUI.update_player_score()
+                        self.playerUI.update_player_score(self.game.settings.score)
+                        self.game.ga_anim.set_anim(self.game.settings.score, '+')
 
     @staticmethod
     def calculate_pos(pos, rect):
