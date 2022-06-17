@@ -127,6 +127,7 @@ class Game:
         self._check_player_life()
 
         self.ga_anim.animate()
+        self.playerUI.animate_health_val()
 
     def load_shooter_of_player_ship(self):
         if len(self.player_ship_missiles) < self.settings.player_missile_count:
@@ -257,5 +258,9 @@ if __name__ == "__main__":
 
                 elif event.key == K_h:
                     difficulty = 'h'
+
+                elif event.key == K_RETURN or event.key == K_KP_ENTER:
+                    main_screen = False
+                    Game().run()
 
         pygame.display.update()

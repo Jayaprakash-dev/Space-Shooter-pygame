@@ -11,7 +11,7 @@ class GameHitsAnimation:
         font_file = "./assets/fonts/SpaceMission.otf"
         self.font_color = None
 
-        self.font = pygame.font.Font(font_file, 30)
+        self.font = pygame.font.Font(font_file, 32)
 
         self.hits_font = None
         self.y = 400

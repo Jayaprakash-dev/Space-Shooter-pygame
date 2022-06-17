@@ -14,7 +14,8 @@ class Level(ABC):
     _scale = {
         "level_1_ship": (90, 90),
         "level_2_ship": (100, 100),
-        "level_3_ship": (120, 120)
+        "level_3_ship": (120, 120),
+        "level_4_ship": (120, 120)
     }
 
     ship_level_list_1 = None
@@ -82,32 +83,27 @@ class Level(ABC):
 
         elif game.playerUI.score > ship_creation_limit["last"]:
 
-            Level.ship_level = random.choice([1, 2, 3, 4])
+            Level._ship_level = random.randrange(1, 5)
 
             if Level._ship_level == 1:
                 scale = Level._load_ship_pros(Level._ship_level, ship_speed_limit, game)
-
-            if Level._ship_level == 1:
+            elif Level._ship_level == 2:
                 scale = Level._load_ship_pros(Level._ship_level, ship_speed_limit, game)
-
-            if Level._ship_level == 1:
-                scale = Level._load_ship_pros(Level._ship_level, ship_speed_limit, game)
-
-            if Level._ship_level == 1:
-                scale = Level._load_ship_pros(Level._ship_level, ship_speed_limit, game)
+            elif Level._ship_level == 3 or Level._ship_level == 4:
+                scale = Level._load_ship_pros(3, ship_speed_limit, game)
 
         if len(game.enemy_ships) < game.settings.enemy_ship_count:
             game.enemy_ships.add(EnemyShip(game, Level._ship_level, scale=scale))
 
     @staticmethod
-    def reduce_score(game, limit_val, ship_count):
+    def reduce_score(game, limit_val, ship_count, score):
         symbol = '-'
 
         if game.playerUI.score > limit_val:
             if game.e_ship_passed_count > ship_count:
-                game.playerUI.update_player_score(-5)
+                game.playerUI.update_player_score(-score)
                 game.e_ship_passed_count = 0
-                game.ga_anim.set_anim(5, symbol)
+                game.ga_anim.set_anim(score, symbol)
 
 
 class Easy(Level):
@@ -120,8 +116,8 @@ class Easy(Level):
             "level_1": (0, 400),
             "level_2": (400, 1000),
             "level_3": (800, 2000),
-            "level_4": (2000, 5000),
-            "last": 5000,
+            "level_4": (2000, 3000),
+            "last": 3000,
         }
 
         ship_speed_limit = {
@@ -141,14 +137,14 @@ class Medium(Level):
         Level.ship_level_list_1 = [1, 2]
         Level.ship_level_list_2 = [3, 4]
 
-        Level.interval = 23.0
+        Level.interval = 22.0
 
         ship_creation_limit = {
             "level_1": (0, 300),
             "level_2": (300, 800),
             "level_3": (800, 2000),
-            "level_4": (2000, 5000),
-            "last": 5000,
+            "level_4": (2000, 3000),
+            "last": 3000,
         }
 
         ship_speed_limit = {
@@ -186,8 +182,8 @@ class GameLayout:
 
         elif level_type == 'm':
             Medium.load_level(self.game)
-            Medium.reduce_score(self.game, 15, 6)
+            Medium.reduce_score(self.game, 15, 6, 5)
 
         elif level_type == 'h':
             Hard.load_level(self.game)
-            Hard.reduce_score(self.game, 10, 5)
+            Hard.reduce_score(self.game, 10, 5, 10)

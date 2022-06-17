@@ -6,6 +6,8 @@ class Settings:
 
         self.fps = 60
 
+        self.difficulty = difficulty
+
         # player ship properties
         self.player_ship_speed = 5
 

@@ -4,6 +4,7 @@ import pygame
 class PlayerUI:
 
     def __init__(self, game):
+
         self.game = game
 
         self.player_health = 100
@@ -17,10 +18,19 @@ class PlayerUI:
         self.health_bar_color = (0, 255, 0)
 
         self.wrapper_rect_pos = (860, 20)
-        self.health_bar_pos = (860.6, 21)
+        self.health_bar_pos = (860.8, 21)
 
         self.score = 0
         self.score_font = pygame.font.SysFont('arial', 20)
+
+        self.count = 20
+
+        font_file = "./assets/fonts/SpaceMission.otf"
+        self.font_color = (255, 0, 0)
+        self.font = pygame.font.Font(font_file, 25)
+        self.anim_font = None
+        self.x = 880
+        self.y = 50
 
     def update_player_health(self, val=0):
 
@@ -72,3 +82,16 @@ class PlayerUI:
         x = (self.game.main_surface.get_width() / 2) - 8
         self.s_font = self.score_font.render("score: " + str(self.score), True, (255, 255, 255))
         self.game.main_surface.blit(self.s_font, (x, 17))
+
+    def set_anim(self, val):
+
+        symbol = '- '
+
+        self.anim_font = self.font.render(symbol + str(val), True, self.font_color)
+        self.count = 0
+
+    def animate_health_val(self):
+
+        if self.count < 20:
+            self.game.main_surface.blit(self.anim_font, (self.x, self.y))
+            self.count += 1

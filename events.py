@@ -62,7 +62,15 @@ class Events:
                 self.game.expl.animation = True
                 sprites_grp.remove(enemy_ship)
 
-                self.playerUI.update_player_health(50)
+                if enemy_ship.ship_level == 4:
+                    self.playerUI.update_player_health(100)
+                    self.playerUI.set_anim(100)
+                elif enemy_ship.ship_level == 3:
+                    self.playerUI.update_player_health(50)
+                    self.playerUI.set_anim(50)
+                elif enemy_ship.ship_level == 2 or enemy_ship.ship_level == 1:
+                    self.playerUI.update_player_health(30)
+                    self.playerUI.set_anim(30)
 
     def check_missile_collision(self, bullet, ship_sprites_grp, bullet_sprites_grp):
 
@@ -77,7 +85,13 @@ class Events:
                     bullet_sprites_grp.remove(bullet)
 
                     if str(sprite) == "player_ship":
-                        self.playerUI.update_player_health(15)
+
+                        if self.game.settings.difficulty == 'h':
+                            self.playerUI.update_player_health(20)
+                            self.playerUI.set_anim(20)
+                        else:
+                            self.playerUI.update_player_health(15)
+                            self.playerUI.set_anim(15)
 
                     elif str(sprite) == "enemy_ship":
                         sprite.update_health(25)
