@@ -43,7 +43,6 @@ If running from source then dependencies can be installed from the `requirements
 ![level 1](screenshots/health.png)
 
 ## Credits
-<hr>
 
 ### Assets:
 
